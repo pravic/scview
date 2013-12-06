@@ -1,6 +1,11 @@
 #include "window.hpp"
 #include "listplug.h"
 
+#define _USING_V110_SDK71_
+#include <atlcomcli.h>
+#include <memory>
+#include <wincodec.h>
+
 HINSTANCE ghInstance;
 
 bool supported_file(const wchar_t* loading_file)
@@ -101,10 +106,80 @@ int CALLBACK ListSendCommand(HWND ListWin, int Command, int Parameter)
   return ok ? LISTPLUGIN_OK : LISTPLUGIN_ERROR;
 }
 
-HBITMAP CALLBACK ListGetPreviewBitmapW(const wchar_t* FileToLoad, int width, int height, char* contentbuf, int contentbuflen)
+HBITMAP CALLBACK ListGetPreviewBitmapW(const wchar_t* FileToLoad, int width, int height, const char* contentbuf, int contentbuflen)
 {
   if(!supported_file(FileToLoad))
     return nullptr;
+
+  CComPtr<ID2D1Factory> factory;
+  SciterD2DFactory(&factory);
+  if(!factory)
+    return nullptr;
+
+  auto wnd = std::make_unique<window>(nullptr);
+  if(wnd->load_file(FileToLoad)) {
+
+    // resize window to render document
+    SIZE maxSize = { width, height }, minSize = {1024, 768};
+    bool stretch = minSize.cx > maxSize.cx || minSize.cy > maxSize.cy;
+    if(stretch)
+      wnd->set_size(minSize);
+    else
+      wnd->set_size(maxSize);
+    UpdateWindow(wnd->get_hwnd());
+
+    SIZE wndSize = wnd->get_size();
+
+    CComPtr<ID2D1DCRenderTarget> rt;
+    auto rtprops = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
+    HRESULT hr = factory->CreateDCRenderTarget(&rtprops , &rt);
+    if(!rt)
+      return nullptr;
+
+    HDC screen = ::GetDC(nullptr);
+    HDC dc = CreateCompatibleDC(screen);
+    HBITMAP hbmp = CreateCompatibleBitmap(screen, wndSize.cx, wndSize.cy);
+    auto oldObj = SelectObject(dc, hbmp);
+
+    RECT bindRect = { 0, 0, wndSize.cx, wndSize.cy };
+    hr = rt->BindDC(dc, &bindRect);
+
+    // render document to the render target
+    if(SciterRenderD2D(wnd->get_hwnd(), rt)) {
+
+      if(stretch) {
+        // stretch bitmap
+        SIZE stretch = {};
+        stretch.cy = MulDiv(maxSize.cx, wndSize.cy, wndSize.cx);
+        if(stretch.cy <= maxSize.cy) {
+          stretch.cx = maxSize.cx;
+        } else {
+          stretch.cx = MulDiv(maxSize.cy, wndSize.cx, wndSize.cy);
+          stretch.cy = maxSize.cy;
+        }
+        HDC sdc = CreateCompatibleDC(screen);
+        HBITMAP thumb = CreateCompatibleBitmap(screen, stretch.cx, stretch.cy);
+        auto oldObj2 = SelectObject(sdc, thumb);
+        SetStretchBltMode(sdc, HALFTONE);
+        SetBrushOrgEx(sdc, 0, 0, nullptr);
+
+        StretchBlt(sdc, 0, 0, stretch.cx, stretch.cy, dc, 0, 0, wndSize.cx, wndSize.cy, SRCCOPY);
+        SelectObject(sdc, oldObj2);
+        DeleteDC(sdc);
+
+        // need to free old big image
+        SelectObject(dc, oldObj);
+        DeleteObject(hbmp);
+        hbmp = thumb;
+      } else {
+        // restore original DC
+        SelectObject(dc, oldObj);
+      }
+      DeleteDC(dc);
+      ReleaseDC(nullptr, screen);
+      return hbmp;
+    }
+  }
 
   return nullptr;
 }
