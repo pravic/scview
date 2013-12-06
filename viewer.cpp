@@ -26,17 +26,17 @@ BOOL CALLBACK DllMain(HINSTANCE module, DWORD reason, LPVOID)
   return true;
 }
 
-void __stdcall ListGetDetectString(char* DetectString, int maxlen)
+void CALLBACK ListGetDetectString(char* DetectString, int maxlen)
 {
   std::strncpy(DetectString, R"(EXT="HTM" | EXT="HTML")", maxlen);
 }
 
-HWND __stdcall ListLoad(HWND ParentWin, char* FileToLoad, int ShowFlags)
+HWND CALLBACK ListLoad(HWND ParentWin, char* FileToLoad, int ShowFlags)
 {
   return nullptr;
 }
 
-HWND __stdcall ListLoadW(HWND ParentWin, wchar_t* FileToLoad, int ShowFlags)
+HWND CALLBACK ListLoadW(HWND ParentWin, wchar_t* FileToLoad, int ShowFlags)
 {
   if(!supported_file(FileToLoad))
     return false;
@@ -53,7 +53,7 @@ HWND __stdcall ListLoadW(HWND ParentWin, wchar_t* FileToLoad, int ShowFlags)
   return wnd->get_hwnd();
 }
 
-int __stdcall ListLoadNextW(HWND ParentWin, HWND ListWin, const wchar_t* FileToLoad, int ShowFlags)
+int CALLBACK ListLoadNextW(HWND ParentWin, HWND ListWin, const wchar_t* FileToLoad, int ShowFlags)
 {
   if(!supported_file(FileToLoad))
     return LISTPLUGIN_ERROR;
@@ -69,13 +69,13 @@ int __stdcall ListLoadNextW(HWND ParentWin, HWND ListWin, const wchar_t* FileToL
   return LISTPLUGIN_OK;
 }
 
-void __stdcall ListCloseWindow(HWND ListWin)
+void CALLBACK ListCloseWindow(HWND ListWin)
 {
   if(auto w = window::ptr(ListWin))
     delete w;
 }
 
-int __stdcall ListSendCommand(HWND ListWin, int Command, int Parameter)
+int CALLBACK ListSendCommand(HWND ListWin, int Command, int Parameter)
 {
   auto w = window::ptr(ListWin);
   if(!w)
@@ -100,7 +100,7 @@ int __stdcall ListSendCommand(HWND ListWin, int Command, int Parameter)
   return ok ? LISTPLUGIN_OK : LISTPLUGIN_ERROR;
 }
 
-HBITMAP __stdcall ListGetPreviewBitmapW(const wchar_t* FileToLoad, int width, int height, char* contentbuf, int contentbuflen)
+HBITMAP CALLBACK ListGetPreviewBitmapW(const wchar_t* FileToLoad, int width, int height, char* contentbuf, int contentbuflen)
 {
   if(!supported_file(FileToLoad))
     return nullptr;
