@@ -27,6 +27,13 @@ public:
   void show();
   bool load_file(const wchar_t* uri);
 
+  void ensure_min_size();
+
+  SIZE get_size(bool minsize = false) const;
+  void set_size(const SIZE& size);
+
+public:
+  // TC methods
   bool select_all();
   bool copy_selection();
   bool scroll(int percent);

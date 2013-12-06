@@ -105,3 +105,39 @@ bool window::load_file(const wchar_t* uri)
   return re.get(false) || true;
 }
 
+void window::ensure_min_size()
+{
+  if(!wnd)
+    return;
+  set_size(get_size(true));
+}
+
+SIZE window::get_size(bool minsize) const
+{
+  SIZE size = {};
+  if(!wnd)
+    return size;
+  if(minsize) {
+    size.cx = SciterGetMinWidth(wnd);
+    size.cy = SciterGetMinHeight(wnd, size.cx);
+  } else {
+    RECT rc = {};
+    GetClientRect(wnd, &rc);
+    size.cx = rc.right;
+    size.cy = rc.bottom;
+  }
+  return size;
+}
+
+void window::set_size(const SIZE& size)
+{
+  if(wnd) {
+    RECT wc, rc;
+    GetWindowRect(wnd, &wc);
+    GetClientRect(wnd, &rc);
+    OffsetRect(&wc, -wc.left, -wc.top);
+    rc.right = (wc.right - rc.right) + size.cx;
+    rc.bottom = (wc.bottom - rc.bottom) + size.cy;
+    SetWindowPos(wnd, nullptr, 0, 0, rc.right, rc.bottom, SWP_NOZORDER | SWP_NOMOVE);
+  }
+}
