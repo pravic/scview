@@ -42,15 +42,16 @@ HWND CALLBACK ListLoadW(HWND ParentWin, wchar_t* FileToLoad, int ShowFlags)
     return false;
 
   // create viewer window and load file
-  window* wnd = new window(ParentWin);
-  if(!wnd->load_file(FileToLoad)) {
-    delete wnd;
+  auto wnd = std::make_unique<window>(ParentWin);
+  if(!wnd->load_file(FileToLoad))
     return nullptr;
-  }
 
   // show window & go
   wnd->show();
-  return wnd->get_hwnd();
+  HWND re = wnd->get_hwnd();
+  if(re)
+    wnd.release();
+  return re;
 }
 
 int CALLBACK ListLoadNextW(HWND ParentWin, HWND ListWin, const wchar_t* FileToLoad, int ShowFlags)
