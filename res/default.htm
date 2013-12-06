@@ -41,7 +41,7 @@
     forward.onClick = :: content.goForward();
     
 		self.$(button#inspector).onClick = :: view.launchDebugView();
-		self.$(button#reload).onClick = reloadFile;
+		self.$(button#reload).onClick = :: reloadFile();
 
 		function loadFileToView(fn) {
 			currentFile = "file://" + fn;
@@ -92,7 +92,7 @@
 	<div id="toolbar" role="toolbar">
     <button #back title="Go backward" accesskey="LEFT" disabled />
     <button #forward title="Go forward" accesskey="RIGHT" disabled />
-		<button #reload title="DOM Inspector (F12)" accesskey="F5" disabled/>
+		<button #reload title="Reload" accesskey="F5" disabled/>
 		<button #inspector title="DOM Inspector (F12)" accesskey="F12" />
 	</div>
 	<frame id="content" src="" history>
