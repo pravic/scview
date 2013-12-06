@@ -3,6 +3,23 @@
 
 HINSTANCE ghInstance;
 
+bool supported_file(const wchar_t* loading_file)
+{
+  if(!loading_file)
+    return false;
+
+  std::wstring file = loading_file;
+  size_t extp = file.rfind('.');
+  if(extp == file.npos)
+    return false;
+
+  const wchar_t* ext = &file[extp + 1];
+  if(!(wcsicmp(ext, L"htm") == 0 || wcsicmp(ext, L"html") == 0))
+    return false;
+
+  return true;
+}
+
 BOOL CALLBACK DllMain(HINSTANCE module, DWORD reason, LPVOID)
 {
   ghInstance = module;
@@ -21,18 +38,8 @@ HWND __stdcall ListLoad(HWND ParentWin, char* FileToLoad, int ShowFlags)
 
 HWND __stdcall ListLoadW(HWND ParentWin, wchar_t* FileToLoad, int ShowFlags)
 {
-  if(!FileToLoad)
-    return nullptr;
-
-  // check ext
-  std::wstring file = FileToLoad;
-  size_t extp = file.rfind('.');
-  if(extp == file.npos)
-    return nullptr;
-
-  const wchar_t* ext = &file[extp + 1];
-  if(!(wcsicmp(ext, L"htm") == 0 || wcsicmp(ext, L"html") == 0))
-    return nullptr;
+  if(!supported_file(FileToLoad))
+    return false;
 
   // create viewer window and load file
   window* wnd = new window(ParentWin);
@@ -48,6 +55,9 @@ HWND __stdcall ListLoadW(HWND ParentWin, wchar_t* FileToLoad, int ShowFlags)
 
 int __stdcall ListLoadNextW(HWND ParentWin, HWND ListWin, const wchar_t* FileToLoad, int ShowFlags)
 {
+  if(!supported_file(FileToLoad))
+    return LISTPLUGIN_ERROR;
+
   auto w = window::ptr(ListWin);
   if(!w)
     return LISTPLUGIN_ERROR;
@@ -92,5 +102,8 @@ int __stdcall ListSendCommand(HWND ListWin, int Command, int Parameter)
 
 HBITMAP __stdcall ListGetPreviewBitmapW(const wchar_t* FileToLoad, int width, int height, char* contentbuf, int contentbuflen)
 {
+  if(!supported_file(FileToLoad))
+    return nullptr;
+
   return nullptr;
 }
