@@ -1,0 +1,4 @@
+[plugininstall] 
+ description=HTML Viewer based Sciter core.
+ type=wlx
+ file=scview.wlx 
