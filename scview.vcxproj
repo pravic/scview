@@ -41,13 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>c:\Program Files\Microsoft SDKs\Windows\v7.0\Include;$(IncludePath);f:\usr\lib\gui\htmlayout\include</IncludePath>
-    <LibraryPath>c:\Program Files\Microsoft SDKs\Windows\v7.0\Lib;$(LibraryPath);f:\usr\lib\gui\htmlayout\lib</LibraryPath>
+    <IncludePath>$(IncludePath);f:\usr\lib\gui\htmlayout\include</IncludePath>
+    <LibraryPath>$(LibraryPath);f:\usr\lib\gui\htmlayout\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>c:\Program Files\Microsoft SDKs\Windows\v7.0\Include;$(IncludePath);f:\usr\lib\gui\htmlayout\include</IncludePath>
-    <LibraryPath>c:\Program Files\Microsoft SDKs\Windows\v7.0\Lib;$(LibraryPath);f:\usr\lib\gui\htmlayout\lib</LibraryPath>
+    <IncludePath>$(IncludePath);f:\usr\lib\gui\htmlayout\include</IncludePath>
+    <LibraryPath>$(LibraryPath);f:\usr\lib\gui\htmlayout\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
