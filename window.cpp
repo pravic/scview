@@ -31,7 +31,7 @@ window::window(HWND parent)
   RECT rc;
   GetClientRect(parent, &rc);
 
-  wnd = CreateWindowEx(0, MAKEINTATOM(get_class()), NULL, WS_CHILD | WS_CLIPCHILDREN | WS_TABSTOP, 0, 0, rc.right, rc.bottom, parent, nullptr, ghInstance, nullptr);
+  wnd = CreateWindowEx(0, MAKEINTATOM(get_class()), NULL, (parent ? WS_CHILD : WS_OVERLAPPED) | WS_CLIPCHILDREN | WS_TABSTOP, 0, 0, rc.right, rc.bottom, parent, nullptr, ghInstance, nullptr);
   if(!wnd)
     return;
 
@@ -39,7 +39,8 @@ window::window(HWND parent)
   setup_callback();
   attach_dom_event_handler(wnd, this);
 
-  __super::load_file(L"res:default.htm");
+  if(parent)  // load by html viewer or load directly in window for print
+    __super::load_file(L"res:default.htm");
 
 }
 
@@ -102,7 +103,9 @@ bool window::load_file(const wchar_t* uri)
 {
   dom::element root = get_root();
   json::value re = root.call_function("loadFileToView", json::value(uri));
-  return re.get(false) || true;
+  if(!re.get(false))
+    re = __super::load_file(uri);
+  return re.get(false);
 }
 
 void window::ensure_min_size()
