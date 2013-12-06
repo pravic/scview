@@ -91,6 +91,12 @@
       <ModuleDefinitionFile>viewer.def</ModuleDefinitionFile>
       <SetChecksum>true</SetChecksum>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(TargetPath)" plugin\$(ProjectName).wlx</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copying...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="listplug.h" />
