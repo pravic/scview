@@ -1,0 +1,101 @@
+<html>
+<head>
+	<style>
+		frame#content
+		{
+		  // behavior: htmlarea; /* to make it selectable */
+  	}
+
+		#toolbar 
+		{
+		  flow:horizontal;
+		  border-bottom:3px solid threedface;
+		}
+		#toolbar > button
+		{
+		  behavior:clickable;
+		  width: 34px;
+		  height: 34px;
+		  padding: 2px;
+		  foreground-position:center center;
+		  foreground-repeat:no-repeat;
+		  background-image:none;  
+		}
+		#toolbar > button:hover	{ foreground-image-transformation: contrast-brightness-gamma(0.5,0.7, 1.3);	}
+		#toolbar > button:active { foreground-image-transformation: contrast-brightness-gamma(0.5,0.4, 1.0);	}
+		#toolbar > button:disabled { foreground-image-transformation:colorize(threedshadow); }
+		#toolbar > button#back    { foreground-image:url(res:back.png); }
+		#toolbar > button#forward { foreground-image:url(res:forward.png); }
+		#toolbar > button#reload  { foreground-image:url(res:reload.png); }
+    #toolbar > button#inspector { foreground-image:url(res:inspector.png); }
+	</style>
+
+	<script type="text/tiscript">
+    var back      = self.$(#toolbar>button#back);
+    var forward   = self.$(#toolbar>button#forward);
+    var reload		= self.$(#toolbar>button#reload);
+    var content   = self.$(frame#content);
+    var currentFile;
+
+    back.onClick    = :: content.goBack();
+    forward.onClick = :: content.goForward();
+    
+		self.$(button#inspector).onClick = :: view.launchDebugView();
+		self.$(button#reload).onClick = reloadFile;
+
+		function loadFileToView(fn) {
+			currentFile = "file://" + fn;
+			content.load(currentFile);
+			reload.state.disabled = false;
+			return true;
+		}
+		
+		function reloadFile() {
+			content.clear();
+			content.load(currentFile);
+		}
+
+    content.onControlEvent = function(evt)
+    {
+      if(evt.type == Event.HISTORY_STATE_CHANGED) {
+        back.state.disabled = !content.canGoBack();
+        forward.state.disabled = !content.canGoForward();
+        return true;
+        
+      } else if(evt.type == (Event.HYPERLINK_CLICK | Event.SINKING)) {
+        var url = evt.target.@["href"];
+        if(url like "http:*" || url like "https:*") {
+          Sciter.launch(url); // show external URLs in system browser.
+          return true;
+        }
+      }
+    }
+    
+		function self.onKey(evt)
+		{
+		  if(evt.type == Event.KEY_DOWN) {
+				 if (evt.keyCode == Event.VK_F12 && !inspectorButton.state.disabled) {
+					view.launchDebugView();
+					return true;
+				} else if(evt.keyCode == Event.VK_F5) {
+					reloadFile();
+					return true;
+				}
+			}
+		}
+
+    
+	</script>
+	
+</head>
+<body>
+	<div id="toolbar" role="toolbar">
+    <button #back title="Go backward" accesskey="LEFT" disabled />
+    <button #forward title="Go forward" accesskey="RIGHT" disabled />
+		<button #reload title="DOM Inspector (F12)" accesskey="F5" disabled/>
+		<button #inspector title="DOM Inspector (F12)" accesskey="F12" />
+	</div>
+	<frame id="content" src="" history>
+	</frame>
+</body>
+</html>
