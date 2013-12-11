@@ -47,6 +47,9 @@
 			currentFile = "file://" + fn;
 			content.load(currentFile);
 			reload.state.disabled = false;
+			var first = content.first;
+			if(first)
+				first.state.focus = true;
 			return true;
 		}
 		
