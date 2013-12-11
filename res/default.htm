@@ -28,6 +28,13 @@
 		#toolbar > button#forward { foreground-image:url(res:forward.png); }
 		#toolbar > button#reload  { foreground-image:url(res:reload.png); }
     #toolbar > button#inspector { foreground-image:url(res:inspector.png); }
+    
+    #toolbar div[name="version"] {
+    	padding: 10px;
+    	vertical-align: middle;
+    	color: lavender;
+    	font-style: italic;
+    }
 	</style>
 
 	<script type="text/tiscript">
@@ -86,6 +93,19 @@
 				}
 			}
 		}
+		
+		function fillVersion() {
+			var sciterVer = String.printf("%d.%d.%d.%d", 
+		  	(Sciter.VERSION >> 16) & 0xffff, Sciter.VERSION & 0xffff,
+		  	(Sciter.REVISION >> 16) & 0xffff, Sciter.REVISION & 0xffff);
+		  var ver = view.peversion();
+		  var el = $(#toolbar #version);
+		  el.text = ver.join(".");
+		  el.attributes["title"] = "via sciter " + sciterVer;
+		}
+		
+		// onLoad
+		fillVersion();
 
     
 	</script>
@@ -97,6 +117,7 @@
     <button #forward title="Go forward" accesskey="RIGHT" disabled />
 		<button #reload title="Reload" accesskey="F5" disabled/>
 		<button #inspector title="DOM Inspector (F12)" accesskey="F12" />
+		<div name="version">ver <span id="version"/></div>
 	</div>
 	<frame id="content" src="" history>
 	</frame>
