@@ -144,3 +144,32 @@ void window::set_size(const SIZE& size)
     SetWindowPos(wnd, nullptr, 0, 0, rc.right, rc.bottom, SWP_NOZORDER | SWP_NOMOVE);
   }
 }
+
+json::value window::get_version(const json::value& module)
+{
+  #pragma comment(lib, "Version.lib")
+  json::value re = json::value::null();
+
+  wchar_t path[MAX_PATH];
+  GetModuleFileNameW(ghInstance, path, _countof(path));
+  if(module.is_string())
+    wcsncpy(path, module.get_chars().start, module.get_chars().length);
+
+  DWORD dummy;
+  DWORD cb = GetFileVersionInfoSizeW(path, &dummy);
+  std::vector<byte> buf(cb);
+  void* res = &buf[0];
+  if(!GetFileVersionInfoW(path, dummy, cb, res))
+    return re;
+
+  VS_FIXEDFILEINFO* ver = nullptr;
+  if(!VerQueryValueW(res, L"\\", reinterpret_cast<void**>(&ver), reinterpret_cast<PUINT>(&cb)))
+    return re;
+
+  // major, minor, release, build
+  re[0] = HIWORD(ver->dwFileVersionMS);
+  re[1] = LOWORD(ver->dwFileVersionMS);
+  re[2] = HIWORD(ver->dwFileVersionLS);
+  re[3] = LOWORD(ver->dwFileVersionLS);
+  return re;
+}

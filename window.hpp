@@ -42,10 +42,13 @@ public:
 protected:
   BEGIN_FUNCTION_MAP
     FUNCTION_0("launchDebugView", launch_debug);
+    FUNCTION_1("peversion", get_version);
+    FUNCTION_0("peversion", get_version);
   END_FUNCTION_MAP
 
 protected:
   json::value launch_debug();
+  json::value get_version(const json::value& module = json::value());
 
 private:
   HWND wnd;
